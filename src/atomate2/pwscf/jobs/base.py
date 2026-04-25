@@ -1,4 +1,4 @@
-"""Base Q E job maker and helper decorator.
+"""Base PWSCF job maker and helper decorator.
 
 Provides a `qe_job` decorator (thin wrapper of `jobflow.job`) and a base maker
 `BaseQEMaker` to follow project conventions.
@@ -12,7 +12,7 @@ from typing import Any
 
 
 def qe_job(method):
-    """Decorator for QE maker `make` methods. Wraps `jobflow.job`.
+    """Decorator for PWSCF maker `make` methods. Wraps `jobflow.job`.
 
     This is a small alias to keep API consistent with `vasp.vasp_job`.
     """
@@ -21,7 +21,7 @@ def qe_job(method):
 
 @dataclass
 class BaseQEMaker(Maker):
-    """Base QE job maker scaffold.
+    """Base PWSCF job maker scaffold.
 
     Subclasses should implement `make(self, structure, prev_dir=None)` decorated
     with `@qe_job`.

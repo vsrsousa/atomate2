@@ -6,8 +6,8 @@ Objetivo: implementar suporte a Quantum ESPRESSO (pw.x) seguindo o mesmo padrão
 - Reproduzir a arquitetura de `vasp` para `qe` para manter API consistente.
 
 ## Componentes principais a criar
-- `src/atomate2/qe/run.py` — `run_qe(...)` (wrapper de execução, validators/handlers)
-- `src/atomate2/qe/sets/`
+- `src/atomate2/pwscf/run.py` — `run_pwscf(...)` (wrapper de execução, validators/handlers)
+- `src/atomate2/pwscf/sets/`
   - `base.py`: `QeInputGenerator` (user_control, user_system, user_electrons, user_kpoints, user_pseudos)
   - `core.py`: `RelaxSetGenerator`, `StaticSetGenerator`, `BandsSetGenerator`
 - `src/atomate2/qe/jobs/`
@@ -16,7 +16,7 @@ Objetivo: implementar suporte a Quantum ESPRESSO (pw.x) seguindo o mesmo padrão
 - `src/atomate2/qe/flows/` — flows análogos aos de VASP (double relax, bandstructure, etc.)
 - `src/atomate2/qe/powerups.py` — utilitários para alterar input generators em flows
 - `src/atomate2/qe/schemas/` — mapeamento/parsers de saída para TaskDoc (usar `pymatgen.io.espresso` quando possível)
-- utilitários: `write_qe_input_set()`, `copy_qe_outputs()`, parsers de saída
+- utilitários: `write_pwscf_input_set()`, `copy_pwscf_outputs()`, parsers de saída
 
 ## Mapeamento conceitual (VASP → QE)
 - INCAR → NAMELISTS (`&CONTROL`, `&SYSTEM`, `&ELECTRONS`, `&IONS`, `&CELL`)
@@ -50,15 +50,15 @@ Objetivo: implementar suporte a Quantum ESPRESSO (pw.x) seguindo o mesmo padrão
 - Workflow CI que roda testes sem executar pw.x real.
 
 ## Arquivos a criar (esqueleto)
-- `src/atomate2/qe/run.py`
-- `src/atomate2/qe/sets/base.py`
-- `src/atomate2/qe/sets/core.py`
-- `src/atomate2/qe/jobs/base.py`
-- `src/atomate2/qe/jobs/core.py`
-- `src/atomate2/qe/flows/core.py`
-- `src/atomate2/qe/powerups.py`
-- `src/atomate2/qe/schemas/__init__.py`
-- `tests/qe/test_sets.py`, `tests/qe/test_run.py`, `tests/qe/test_jobs.py`
+- `src/atomate2/pwscf/run.py`
+- `src/atomate2/pwscf/sets/base.py`
+- `src/atomate2/pwscf/sets/core.py`
+- `src/atomate2/pwscf/jobs/base.py`
+- `src/atomate2/pwscf/jobs/core.py`
+- `src/atomate2/pwscf/flows/core.py`
+- `src/atomate2/pwscf/powerups.py`
+- `src/atomate2/pwscf/schemas/__init__.py`
+- `tests/pwscf/test_sets.py`, `tests/pwscf/test_run.py`, `tests/pwscf/test_jobs.py`
 
 ## Checklist (workflow)
 - [ ] Gerar esqueleto dos arquivos no branch `qe`
@@ -79,7 +79,7 @@ Arquivo gerado automaticamente em: `DEV_NOTES/qe_module_plan.md`
 - Ambiente Conda `atomate` criado e ativado (Python 3.11.13).
 - Dependências do projeto instaladas no env (`python -m pip install -e .`).
 - Documento de design e plano criado (`DEV_NOTES/qe_module_plan.md`).
-- Scaffold do módulo QE adicionado em `src/atomate2/qe` (sets, jobs, flows,
+-- Scaffold do módulo PWSCF adicionado em `src/atomate2/pwscf` (sets, jobs, flows,
   run, files, powerups, schemas, __init__).
 - Teste inicial adicionado: `tests/qe/test_sets.py`.
 

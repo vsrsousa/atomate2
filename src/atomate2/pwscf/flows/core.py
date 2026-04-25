@@ -1,4 +1,4 @@
-"""QE flows (composed makers).
+"""PWSCF flows (composed makers).
 
 Provide flow makers that compose `jobs` to build higher-level workflows.
 """
@@ -8,7 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from jobflow import Flow, Maker
 
-from atomate2.qe.jobs.core import RelaxMaker, StaticMaker
+from atomate2.pwscf.jobs.core import RelaxMaker, StaticMaker
 
 
 @dataclass

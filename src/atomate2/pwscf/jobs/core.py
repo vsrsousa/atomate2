@@ -1,8 +1,8 @@
-"""Core QE makers (relax, static, bands).
+"""Core PWSCF makers (relax, static, bands).
 
 These are scaffolds that follow the naming and signatures used by the VASP
-makers. Implementation details should call `write_qe_input_set` and
-`run_qe` from the `files` and `run` modules respectively.
+makers. Implementation details should call `write_pwscf_input_set` and
+`run_pwscf` from the `files` and `run` modules respectively.
 """
 
 from __future__ import annotations
@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING
 
 from jobflow import Response
 
-from atomate2.qe.jobs.base import BaseQEMaker, qe_job
+from atomate2.pwscf.jobs.base import BaseQEMaker, qe_job
 
 if TYPE_CHECKING:
     from pymatgen.core.structure import Structure

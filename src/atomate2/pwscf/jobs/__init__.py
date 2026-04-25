@@ -1,4 +1,4 @@
-"""QE job makers."""
+"""PWSCF job makers."""
 
 from __future__ import annotations
 
