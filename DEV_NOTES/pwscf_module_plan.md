@@ -23,7 +23,7 @@ Objetivo: implementar suporte a Quantum ESPRESSO (pw.x) seguindo o mesmo padrão
 - POSCAR → `ATOMIC_POSITIONS` / `CELL_PARAMETERS` (usar `pymatgen.io.espresso`)
 - POTCAR → pseudopotenciais (`user_pseudos` mapping elemento→arquivo)
 - KPOINTS → `K_POINTS` card
--- WAVECAR/CHGCAR → arquivos de densidade/restart do PWSCF (`save` / `restart`)
+- WAVECAR/CHGCAR → arquivos de densidade/restart do PWSCF (`save` / `restart`)
 
 ## Execução e tratamento de erros
 - Opções:
@@ -61,9 +61,9 @@ Objetivo: implementar suporte a Quantum ESPRESSO (pw.x) seguindo o mesmo padrão
 - `tests/pwscf/test_sets.py`, `tests/pwscf/test_run.py`, `tests/pwscf/test_jobs.py`
 
 ## Checklist (workflow)
-- [ ] Gerar esqueleto dos arquivos no branch `pwscf`
-- [ ] Implementar `PwscfInputGenerator` e `write_pwscf_input_set`
-- [ ] Implementar `BasePwscfMaker` e decorator `pwscf_job`
+- [x] Gerar esqueleto dos arquivos no branch `pwscf`
+- [x] Implementar `PwscfInputGenerator` e `write_pwscf_input_set`
+- [x] Implementar `BasePwscfMaker` e decorator `pwscf_job`
 - [ ] Implementar `run_pwscf` com validators/handlers básicos
 - [ ] Implementar makers e flows principais
 - [ ] Implementar parsers de saída para `TaskDoc`
@@ -75,7 +75,7 @@ Arquivo gerado automaticamente em: `DEV_NOTES/pwscf_module_plan.md`
 
 ## Progresso Atual (2026-04-25)
 
--- Branch `pwscf` criado, com push para `origin/pwscf`.
+- Branch `pwscf` criado, com push para `origin/pwscf`.
 - Ambiente Conda `atomate` criado e ativado (Python 3.11.13).
 - Dependências do projeto instaladas no env (`python -m pip install -e .`).
 - Documento de design e plano criado (`DEV_NOTES/pwscf_module_plan.md`).
@@ -85,10 +85,45 @@ Arquivo gerado automaticamente em: `DEV_NOTES/pwscf_module_plan.md`
 
 ## Próximos passos (curto prazo)
 
--- Implementar `write_pwscf_input_set` usando `pymatgen.io.pwscf`.
--- Implementar `run_pwscf` com validações/handlers (comportamento similar ao custodian).
+- Implementar `write_pwscf_input_set` usando `pymatgen.io.pwscf`.
+- Implementar `run_pwscf` com validações/handlers (comportamento similar ao custodian).
 - Implementar makers/flows concretos e parsers de saída para `TaskDoc`.
 - Adicionar testes unitários para runner e parsers; configurar CI.
 
-_Entrada atualizada automaticamente pelo assistente para rastrear evolução._
+## K-path presets and `seekpath` integration
 
+- BandsSetGenerator now supports a `kpath_preset` parameter to select an
+  automatic k-path backend. Current preset: `seekpath` (recommended when
+  available). The generator will fall back to `pymatgen`'s
+  `HighSymmKpath` when `seekpath` is not present.
+
+- To enable `seekpath` in local development or CI, add it to the test/dev
+  extras. Example (pyproject.toml) under `[project.optional-dependencies]`:
+
+  seekpath = [
+    "seekpath>=0.13"
+  ]
+
+- In CI, add `pip install seekpath` to the test job if you want the
+  `seekpath`-backed integration test to run. The unit tests in
+  `tests/pwscf` are robust and will monkeypatch or skip when `seekpath` is
+  absent, but the integration test that uses the real `seekpath` will only
+  run when the package is available.
+
+Example (user code):
+
+```python
+from atomate2.pwscf.sets.core import BandsSetGenerator
+
+# prefer seekpath backend (if installed)
+gen = BandsSetGenerator(kpath_preset='seekpath', user_pseudos={'Si': 'Si.upf'})
+write_pwscf_input_set(structure, gen, out_dir='.')
+```
+
+Notes:
+- The generator appends a formatted `K_POINTS` card to the `pw.in` file
+  when k-points are produced.
+- If no kpoints are generated (missing backend), callers should provide
+  explicit `user_kpoints` in the generator.
+
+_Entrada atualizada automaticamente pelo assistente para rastrear evolução._

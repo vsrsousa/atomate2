@@ -67,3 +67,43 @@ def test_parse_pwscf_output_handles_missing_attributes(monkeypatch, tmp_path):
     # should not raise
     res = parse_pwscf_output(tmp_path / "does_not_exist.out")
     assert "final_energy" in res and "converged" in res
+
+
+def test_run_pwscf_validators_and_handlers(monkeypatch, tmp_path):
+    # simulate subprocess.call behavior that writes different outputs per call
+    calls = {"n": 0}
+
+    def fake_call(cmd, shell):
+        calls["n"] += 1
+        if calls["n"] == 1:
+            (tmp_path / "pw.out").write_text("BAD")
+            return 0
+        else:
+            (tmp_path / "pw.out").write_text("GOOD")
+            return 0
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr("subprocess.call", fake_call)
+
+    # validator: return True only when out_file contains GOOD
+    def validator(result):
+        out = result.get("out_file")
+        if not out:
+            return False
+        try:
+            text = Path(out).read_text()
+        except Exception:
+            return False
+        return "GOOD" in text
+
+    # handler: no-op (we allow subprocess.call second invocation to produce GOOD)
+    def handler(result, attempt, cmd):
+        # record that handler ran
+        result.setdefault("_handler_runs", 0)
+        result["_handler_runs"] += 1
+
+    res = run_pwscf(pwscf_cmd="echo noop", validators=(validator,), handlers=(handler,), custodian_kwargs={"backoff": 0, "max_retries": 3})
+    assert res["return_code"] == 0
+    assert res["out_file"] is not None
+    # validator should have passed after retry
+    assert Path(res["out_file"]).read_text() == "GOOD"

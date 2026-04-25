@@ -34,4 +34,4 @@ class BasePwscfMaker(Maker):
     write_input_set_kwargs: dict = field(default_factory=dict)
     # Primary preferred name for kwargs passed to the runner
     run_pwscf_kwargs: dict = field(default_factory=dict)
-    # Note: legacy `qe` names were removed; use `run_pwscf_kwargs`.
+    task_document_kwargs: dict = field(default_factory=dict)

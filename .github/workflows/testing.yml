@@ -384,7 +384,7 @@ jobs:
         run: sphinx-build docs docs_build
 
   automerge:
-    needs: [docs, lint, test-forcefields, test-non-ase, test-notebooks-and-ase, test-openff, test-torchsim]
+    needs: [docs, lint, test-forcefields, test-non-ase, test-notebooks-and-ase, test-openff, test-torchsim, test-pwscf]
     runs-on: ubuntu-latest
 
     permissions:
@@ -393,3 +393,47 @@ jobs:
 
     steps:
       - uses: fastify/github-action-merge-dependabot@v3
+
+  test-pwscf:
+    # prevent this action from running on forks
+    if: github.repository == 'materialsproject/atomate2'
+
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -l {0}
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up micromamba
+        uses: mamba-org/setup-micromamba@main
+        with:
+          environment-name: a2
+          cache-environment: false
+          create-args: >-
+            python=3.11
+
+      - name: Install uv
+        run: micromamba run -n a2 pip install uv
+
+      - name: Install conda dependencies
+        run: |
+          micromamba install -n a2 -c conda-forge packmol --yes
+
+      - name: Install dependencies (pwscf extras)
+        run: |
+          micromamba activate a2
+          python -m pip install --upgrade pip
+          uv pip install .[pwscf] --group tests
+
+      - name: Run pwscf tests
+        run: |
+          micromamba activate a2
+          pytest -n auto --cov=atomate2 --cov-report=xml tests/pwscf
+
+      - uses: codecov/codecov-action@v1
+        if: github.repository == 'materialsproject/atomate2'
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ./coverage.xml

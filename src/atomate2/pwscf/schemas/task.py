@@ -47,7 +47,23 @@ class TaskDocument(BaseModel):
     output: PWOutputSummary | None = Field(None)
     structure: Union[Structure, str] | None = Field(None, description="Final output structure from the task")
     additional: Dict[str, Any] | None = Field(None)
-    schema: str | None = Field(None)
+    schema_: str | None = Field(None, alias="schema")
+
+    # Support both pydantic v1 and v2 without emitting deprecation warnings.
+    try:
+        import pydantic as _pydantic
+
+        _pyd_major = int(getattr(_pydantic, "__version__", "0").split(".")[0])
+    except Exception:
+        _pyd_major = 0
+
+    if _pyd_major >= 2:
+        # pydantic v2 config
+        model_config = {"populate_by_name": True}
+    else:
+        # pydantic v1 config
+        class Config:  # type: ignore[misc]
+            allow_population_by_field_name = True
 
     @classmethod
     def from_directory(cls, dir_name: Union[Path, str], **kwargs) -> "TaskDocument":

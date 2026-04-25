@@ -16,3 +16,9 @@ __all__ = [
     "files",
     "schemas",
 ]
+
+# Re-export commonly used helpers at package level for convenience
+from .powerups import *  # noqa: F401,F403
+
+# Extend __all__ with the powerups module symbols (keeps namespace friendly)
+__all__.extend([n for n in dir() if not n.startswith("_")])

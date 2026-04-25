@@ -3,6 +3,7 @@ from monty.json import MSONable
 from jobflow import run_locally
 from pymatgen.core import Structure, Lattice
 from atomate2.pwscf.jobs.core import RelaxMaker, StaticMaker
+from atomate2.pwscf.jobs.core import NonSCFMaker, BandStructureMaker
 
 class DummyInputGenerator(MSONable):
     def __init__(self, **kwargs):
@@ -64,3 +65,24 @@ def test_static_maker_runs_and_parses(monkeypatch, tmp_path, si_structure):
     resp = list(responses.values())[0][1]
     td = resp.output
     assert td.additional["run"]["return_code"] == 1
+
+
+def test_nscf_and_bands_makers(monkeypatch, tmp_path, si_structure):
+    # reuse the same pattern of mocking used above
+    monkeypatch.setattr("atomate2.pwscf.jobs.core.write_pwscf_input_set", lambda *a, **k: None)
+    monkeypatch.setattr(
+        "atomate2.pwscf.jobs.core.run_pwscf",
+        lambda **k: {"return_code": 0, "out_file": str(tmp_path / "pw.out")},
+    )
+    monkeypatch.setattr("atomate2.pwscf.jobs.core.parse_pwscf_output", lambda p: {"final_energy": -2.0})
+    (tmp_path / "pw.out").touch()
+
+    nmaker = NonSCFMaker(input_set_generator=DummyInputGenerator(), run_pwscf_kwargs={})
+    bmaker = BandStructureMaker(input_set_generator=DummyInputGenerator(), run_pwscf_kwargs={})
+
+    for maker in (nmaker, bmaker):
+        job = maker.make(structure=si_structure)
+        responses = run_locally(job, create_folders=True, ensure_success=True)
+        resp = list(responses.values())[0][1]
+        td = resp.output
+        assert td.output.final_energy == -2.0

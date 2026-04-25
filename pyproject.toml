@@ -55,6 +55,10 @@ defects = [
     "python-ulid>=2.7",
 ]
 
+pwscf = [
+    "seekpath>=2.0.0",
+]
+
 ase = ["ase>=3.26.0"]
 ase-ext = ["tblite>=0.3.0; platform_system=='Linux'"]
 forcefields-demo = ["chgnet>=0.3.8","atomate2[ase]"]

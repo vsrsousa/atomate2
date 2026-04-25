@@ -12,6 +12,7 @@ user/atomate-1-vs-2
 user/codes/index
 user/addons
 tutorials/tutorials
+user/pwscf_powerups
 ```
 
 ```{toctree}

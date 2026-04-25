@@ -90,6 +90,22 @@ atomate2 workflows can be run using the [jobflow-remote] or [FireWorks] software
 Atomate2 is a Python 3.10+ library and can be installed using pip. Full installation
 and configuration instructions are provided in the [installation tutorial][installation].
 
+## Optional dependencies
+
+Some functionality in atomate2 requires optional dependencies. These are provided
+as extras in the package and can be installed selectively. For example, to enable
+high-symmetry k-path generation for PWSCF band-structure inputs (via `seekpath`),
+install the `pwscf` extras:
+
+```bash
+pip install .[pwscf]
+```
+
+This will install `seekpath` which the `BandsSetGenerator` can use when
+`kpath_preset='seekpath'` is selected. If `seekpath` is not available, the
+generator will fall back to `pymatgen`'s path utilities or accept an explicit
+`user_kpoints` specification.
+
 ## Tutorials
 
 The documentation includes comprehensive tutorials and reference information to get you
