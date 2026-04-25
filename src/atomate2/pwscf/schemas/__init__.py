@@ -1,7 +1,8 @@
-"""PWSCF schemas and parsers (placeholder)."""
-
 from __future__ import annotations
 
-# Parsers mapping pwscf outputs to TaskDoc/emmet models will live here.
+"""Schemas/parsers package for `pwscf` module."""
 
-__all__ = []
+from .pwscf_output import parse_pwscf_output
+from .task import TaskDocument, PWOutputSummary
+
+__all__ = ["parse_pwscf_output", "TaskDocument", "PWOutputSummary"]

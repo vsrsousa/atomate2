@@ -2,6 +2,6 @@
 
 from __future__ import annotations
 
-from .base import QeInputGenerator
+from .base import PwscfInputGenerator
 
-__all__ = ["QeInputGenerator"]
+__all__ = ["PwscfInputGenerator"]

@@ -1,6 +1,6 @@
 """Base input generator for Quantum ESPRESSO (pw.x) under `pwscf`.
 
-This file mirrors the original `qe` scaffold and provides a `QeInputGenerator`.
+This file provides a `PwscfInputGenerator`.
 """
 
 from __future__ import annotations
@@ -10,7 +10,7 @@ from typing import Any
 
 
 @dataclass
-class QeInputGenerator:
+class PwscfInputGenerator:
     """Minimal PWSCF input generator scaffold.
 
     Attributes
@@ -38,10 +38,7 @@ class QeInputGenerator:
 
         Produces simple namelists for `&CONTROL`, `&SYSTEM` and `&ELECTRONS`,
         a `K_POINTS` card when `user_kpoints` is set, and a brief pseudopotential
-        mapping comment. This is intentionally conservative and does not rely
-        on pymatgen at runtime — callers that have a `Structure` may use
-        `write_pwscf_input_set` (in `files.py`) to augment the input with atomic
-        positions.
+        mapping comment.
         """
 
         def _format_namelist(name: str, data: dict[str, Any]) -> str:
@@ -49,7 +46,7 @@ class QeInputGenerator:
                 return ""
             lines = [f"&{name}"]
             for k, v in data.items():
-                # Basic formatting: strings should be quoted in QE input
+                # Basic formatting: strings should be quoted in pw.x input
                 if isinstance(v, str):
                     lines.append(f"  {k} = '{v}'")
                 else:

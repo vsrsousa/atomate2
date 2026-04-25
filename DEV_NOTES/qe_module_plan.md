@@ -1,34 +1,34 @@
-# Planejamento do Módulo Quantum ESPRESSO (QE)
+# Planejamento do Módulo PWSCF (Quantum ESPRESSO / pw.x)
 
 Objetivo: implementar suporte a Quantum ESPRESSO (pw.x) seguindo o mesmo padrão usado em `src/atomate2/vasp` (makers, input generators, run wrapper, flows, powerups, schemas).
 
 ## Visão geral
-- Reproduzir a arquitetura de `vasp` para `qe` para manter API consistente.
+- Reproduzir a arquitetura de `vasp` para `pwscf` para manter API consistente.
 
 ## Componentes principais a criar
 - `src/atomate2/pwscf/run.py` — `run_pwscf(...)` (wrapper de execução, validators/handlers)
 - `src/atomate2/pwscf/sets/`
-  - `base.py`: `QeInputGenerator` (user_control, user_system, user_electrons, user_kpoints, user_pseudos)
+  - `base.py`: `PwscfInputGenerator` (user_control, user_system, user_electrons, user_kpoints, user_pseudos)
   - `core.py`: `RelaxSetGenerator`, `StaticSetGenerator`, `BandsSetGenerator`
-- `src/atomate2/qe/jobs/`
-  - `base.py`: `BaseQEMaker`, decorator `qe_job`
+- `src/atomate2/pwscf/jobs/`
+  - `base.py`: `BasePwscfMaker`, decorator `pwscf_job`
   - `core.py`: makers (`RelaxMaker`, `StaticMaker`, `NonSCFMaker`, `BandStructureMaker`)
-- `src/atomate2/qe/flows/` — flows análogos aos de VASP (double relax, bandstructure, etc.)
-- `src/atomate2/qe/powerups.py` — utilitários para alterar input generators em flows
-- `src/atomate2/qe/schemas/` — mapeamento/parsers de saída para TaskDoc (usar `pymatgen.io.espresso` quando possível)
+- `src/atomate2/pwscf/flows/` — flows análogos aos de VASP (double relax, bandstructure, etc.)
+- `src/atomate2/pwscf/powerups.py` — utilitários para alterar input generators em flows
+- `src/atomate2/pwscf/schemas/` — mapeamento/parsers de saída para TaskDoc (usar `pymatgen.io.pwscf` quando possível)
 - utilitários: `write_pwscf_input_set()`, `copy_pwscf_outputs()`, parsers de saída
 
-## Mapeamento conceitual (VASP → QE)
+## Mapeamento conceitual (VASP → PWSCF)
 - INCAR → NAMELISTS (`&CONTROL`, `&SYSTEM`, `&ELECTRONS`, `&IONS`, `&CELL`)
 - POSCAR → `ATOMIC_POSITIONS` / `CELL_PARAMETERS` (usar `pymatgen.io.espresso`)
 - POTCAR → pseudopotenciais (`user_pseudos` mapping elemento→arquivo)
 - KPOINTS → `K_POINTS` card
-- WAVECAR/CHGCAR → arquivos de densidade/restart do QE (`save` / `restart`)
+-- WAVECAR/CHGCAR → arquivos de densidade/restart do PWSCF (`save` / `restart`)
 
 ## Execução e tratamento de erros
 - Opções:
   - implementar `custodian`-like handlers para pw.x, ou
-  - implementar loop próprio em `run_qe` com `validators` + `handlers` (recomendado inicialmente)
+  - implementar loop próprio em `run_pwscf` com `validators` + `handlers` (recomendado inicialmente)
 - Handlers típicos: scf não convergiu (ajustar `conv_thr`, `mixing_beta`), mudar diagonalizador, restart, tratamento de I/O.
 - Validators: checar presença de "converged" na saída, arquivos esperados, códigos de erro.
 
@@ -37,12 +37,12 @@ Objetivo: implementar suporte a Quantum ESPRESSO (pw.x) seguindo o mesmo padrão
 - Produzir `TaskDoc`-like output contendo: estrutura final, energia, forças, kpoints, bandstructure/dos (quando aplicável).
 
 ## Pseudopotenciais
-- Estratégia: suportar variável `QE_PSEUDO_DIR` em `SETTINGS` e `user_pseudos` no generator.
+- Estratégia: suportar variável `PWSCF_PSEUDO_DIR` em `SETTINGS` e `user_pseudos` no generator.
 - Utilitário para localizar/validar pseudos antes de rodar.
 
 ## I/O e utilitários
-- `write_qe_input_set(structure, input_generator, out_dir, ...)` — escrever `pw.in` e copiar pseudos.
-- `copy_qe_outputs(prev_dir, ...)` — copiar arquivos de restart anteriores.
+- `write_pwscf_input_set(structure, input_generator, out_dir, ...)` — escrever `pw.in` e copiar pseudos.
+- `copy_pwscf_outputs(prev_dir, ...)` — copiar arquivos de restart anteriores.
 - Compressão/coleção de arquivos para armazenamento (semelhante ao `vasp`).
 
 ## Testes e CI
@@ -61,32 +61,32 @@ Objetivo: implementar suporte a Quantum ESPRESSO (pw.x) seguindo o mesmo padrão
 - `tests/pwscf/test_sets.py`, `tests/pwscf/test_run.py`, `tests/pwscf/test_jobs.py`
 
 ## Checklist (workflow)
-- [ ] Gerar esqueleto dos arquivos no branch `qe`
-- [ ] Implementar `QeInputGenerator` e `write_qe_input_set`
-- [ ] Implementar `BaseQEMaker` e decorator `qe_job`
-- [ ] Implementar `run_qe` com validators/handlers básicos
+- [ ] Gerar esqueleto dos arquivos no branch `pwscf`
+- [ ] Implementar `PwscfInputGenerator` e `write_pwscf_input_set`
+- [ ] Implementar `BasePwscfMaker` e decorator `pwscf_job`
+- [ ] Implementar `run_pwscf` com validators/handlers básicos
 - [ ] Implementar makers e flows principais
 - [ ] Implementar parsers de saída para `TaskDoc`
 - [ ] Adicionar testes unitários e CI
 
 ---
 
-Arquivo gerado automaticamente em: `DEV_NOTES/qe_module_plan.md`
+Arquivo gerado automaticamente em: `DEV_NOTES/pwscf_module_plan.md`
 
 ## Progresso Atual (2026-04-25)
 
-- Branch `qe` criado, com push para `origin/qe`.
+-- Branch `pwscf` criado, com push para `origin/pwscf`.
 - Ambiente Conda `atomate` criado e ativado (Python 3.11.13).
 - Dependências do projeto instaladas no env (`python -m pip install -e .`).
-- Documento de design e plano criado (`DEV_NOTES/qe_module_plan.md`).
--- Scaffold do módulo PWSCF adicionado em `src/atomate2/pwscf` (sets, jobs, flows,
+- Documento de design e plano criado (`DEV_NOTES/pwscf_module_plan.md`).
+- Scaffold do módulo PWSCF adicionado em `src/atomate2/pwscf` (sets, jobs, flows,
   run, files, powerups, schemas, __init__).
-- Teste inicial adicionado: `tests/qe/test_sets.py`.
+- Teste inicial adicionado: `tests/pwscf/test_sets.py`.
 
 ## Próximos passos (curto prazo)
 
-- Implementar `write_qe_input_set` usando `pymatgen.io.espresso`.
-- Implementar `run_qe` com validações/handlers (comportamento similar ao custodian).
+-- Implementar `write_pwscf_input_set` usando `pymatgen.io.pwscf`.
+-- Implementar `run_pwscf` com validações/handlers (comportamento similar ao custodian).
 - Implementar makers/flows concretos e parsers de saída para `TaskDoc`.
 - Adicionar testes unitários para runner e parsers; configurar CI.
 

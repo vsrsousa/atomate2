@@ -11,26 +11,69 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 from jobflow import Response
+from pathlib import Path
 
-from atomate2.pwscf.jobs.base import BaseQEMaker, qe_job
+from atomate2.pwscf.jobs.base import BasePwscfMaker, pwscf_job
+from atomate2.pwscf.files import write_pwscf_input_set
+from atomate2.pwscf.run import run_pwscf
+from atomate2.pwscf.schemas import parse_pwscf_output, TaskDocument
 
 if TYPE_CHECKING:
     from pymatgen.core.structure import Structure
 
 
 @dataclass
-class RelaxMaker(BaseQEMaker):
+class RelaxMaker(BasePwscfMaker):
     name: str = "relax"
 
-    @qe_job
+    @pwscf_job
     def make(self, structure: "Structure", prev_dir: str | None = None) -> Response:
-        raise NotImplementedError()
+        if self.input_set_generator is None:
+            raise RuntimeError("`input_set_generator` must be provided for RelaxMaker")
+
+        # write input files
+        write_pwscf_input_set(structure, self.input_set_generator, out_dir=".")
+
+        # run pw.x
+        run_res = run_pwscf(**self.run_pwscf_kwargs)
+
+        # parse outputs if available
+        parsed = {}
+        out_file = run_res.get("out_file")
+        if out_file is None:
+            p = Path("pw.out")
+            if p.exists():
+                out_file = str(p)
+
+        if out_file:
+            parsed = parse_pwscf_output(out_file)
+
+        # build TaskDocument from parsed results and include run metadata
+        task_doc = TaskDocument.from_parsed(parsed, dir_name=".", run=run_res)
+        return Response(output=task_doc)
 
 
 @dataclass
-class StaticMaker(BaseQEMaker):
+class StaticMaker(BasePwscfMaker):
     name: str = "static"
 
-    @qe_job
+    @pwscf_job
     def make(self, structure: "Structure", prev_dir: str | None = None) -> Response:
-        raise NotImplementedError()
+        if self.input_set_generator is None:
+            raise RuntimeError("`input_set_generator` must be provided for StaticMaker")
+
+        write_pwscf_input_set(structure, self.input_set_generator, out_dir=".")
+        run_res = run_pwscf(**self.run_pwscf_kwargs)
+
+        parsed = {}
+        out_file = run_res.get("out_file")
+        if out_file is None:
+            p = Path("pw.out")
+            if p.exists():
+                out_file = str(p)
+
+        if out_file:
+            parsed = parse_pwscf_output(out_file)
+
+        task_doc = TaskDocument.from_parsed(parsed, dir_name=".", run=run_res)
+        return Response(output=task_doc)

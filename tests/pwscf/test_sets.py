@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-from atomate2.pwscf.sets.base import QeInputGenerator
+from atomate2.pwscf.sets.base import PwscfInputGenerator
 
 
 def test_pwscf_input_generator_to_inp():
-    gen = QeInputGenerator(user_control={"calculation": "scf"})
+    gen = PwscfInputGenerator(user_control={"calculation": "scf"})
     s = gen.to_inp()
     assert isinstance(s, str)
