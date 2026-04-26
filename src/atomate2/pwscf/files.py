@@ -133,6 +133,10 @@ def write_pwscf_input_set(structure, input_generator, out_dir: str | Path = ".")
 
     system = sys_copy
 
+    # Ensure default plane-wave cutoffs appear in &SYSTEM if not provided
+    system.setdefault("ecutwfc", 50)
+    system.setdefault("ecutrho", 400)
+
     # move certain electron-related parameters into &SYSTEM when requested
     # QE users often place `degauss` and `smearing` in the system namelist;
     # accept them from `user_electrons` and ensure they appear in &SYSTEM
