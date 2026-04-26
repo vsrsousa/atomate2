@@ -127,6 +127,11 @@ def write_pwscf_input_set(structure, input_generator, out_dir: str | Path = ".")
         if _e_key in electrons:
             system[_e_key] = electrons.pop(_e_key)
 
+    # if smearing is provided and occupations not explicitly set, assume
+    # the user intends smeared occupations per QE docs
+    if "smearing" in system and "occupations" not in system:
+        system["occupations"] = "smearing"
+
     pw_inp = PWInput(
         structure=structure,
         control=control,

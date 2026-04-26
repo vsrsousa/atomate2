@@ -37,3 +37,8 @@ def test_hubbard_card_and_namelist(tmp_path):
     # degauss and smearing should be present in &SYSTEM (moved from electrons)
     assert "degauss" in system_block
     assert "smearing" in system_block
+    # occupations should be set to 'smearing' when smearing provided
+    lines = [l.strip() for l in system_block.splitlines()]
+    occ_lines = [l for l in lines if l.startswith("occupations")]
+    assert occ_lines, "occupations not found in &SYSTEM"
+    assert "smearing" in occ_lines[0]
