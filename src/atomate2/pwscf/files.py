@@ -32,6 +32,19 @@ def write_pwscf_input_set(structure, input_generator, out_dir: str | Path = ".")
     out_path.mkdir(parents=True, exist_ok=True)
 
     control = getattr(input_generator, "user_control", {}) or {}
+    # sensible defaults for common &CONTROL variables when not provided
+    # Keep I/O/printing flags off by default; set explicit restart_mode.
+    _control_defaults = {
+        "calculation": "scf",
+        "prefix": "pw",
+        "outdir": "./out",
+        "pseudo_dir": "./",
+        "verbosity": "low",
+        "disk_io": "low",
+        "restart_mode": "from_scratch",
+    }
+    for _k, _v in _control_defaults.items():
+        control.setdefault(_k, _v)
     system = getattr(input_generator, "user_system", {}) or {}
     electrons = getattr(input_generator, "user_electrons", {}) or {}
     pseudo = getattr(input_generator, "user_pseudos", {}) or {}
